@@ -23,13 +23,13 @@ class App:
         self.player1_score = 0
         self.player2_score = 0        
 
-        self.player1_emoji = emojis[random.randint(0,8)]
-        self.player2_emoji = emojis[random.randint(0,8)]
-        self.player3_emoji = emojis[random.randint(0,8)]
+        self.player1_emoji = emojis[2]
+        self.player2_emoji = emojis[2]
+        self.player3_emoji = emojis[2]
 
-        self.player1_status = status[random.randint(0,3)]
-        self.player2_status = status[random.randint(0,3)]
-        self.player3_status = status[random.randint(0,3)]
+        self.player1_status = status[2]
+        self.player2_status = status[2]
+        self.player3_status = status[2]
 
 player = input(">> Select player1, player2 or player3: ")
 # the # wildcard means we subscribe to all subtopics of IDD
@@ -51,11 +51,22 @@ def on_connect(client, userdata, flags, rc):
 # this is the callback that gets called each time a message is recived
 def on_message(cleint, userdata, msg):
     print(f"topic: {msg.topic} msg: {msg.payload.decode('UTF-8')}")
-    p = msg.topic[-1]
-    if p == "1":
-        theApp.player1_score = int(msg.payload.decode('UTF-8'))
+    print(msg.topic)
+    p = msg.topic.split("/")
+    p = p[-1]
+    print(p)
+    if p == "player1_emoji":
+        theApp.player1_emoji = emojis[int(msg.payload.decode('UTF-8'))]
+    elif p == "player1_status":
+        theApp.player1_status = status[int(msg.payload.decode('UTF-8'))]
+    elif p == "player2_emoji":
+        theApp.player2_emoji = emojis[int(msg.payload.decode('UTF-8'))]
+    elif p == "player2_status":
+        theApp.player2_status = status[int(msg.payload.decode('UTF-8'))]
+    elif p == "player3_emoji":
+        theApp.player3_emoji = emoji[int(msg.payload.decode('UTF-8'))]     
     else:
-        theApp.player2_score = int(msg.payload.decode('UTF-8'))
+        theApp.player3_status = status[int(msg.payload.decode('UTF-8'))]
     
 	# you can filter by topics
 	# if msg.topic == 'IDD/some/other/topic': do thing
@@ -176,15 +187,6 @@ while True:
     
     count += 1
 
-    theApp.player1_emoji = theApp.player1_emoji if count % 100 != 0 else emojis[random.randint(0,8)]
-    theApp.player2_emoji = theApp.player2_emoji if count % 100 != 0 else emojis[random.randint(0,8)]
-    theApp.player3_emoji = theApp.player3_emoji if count % 100 != 0 else emojis[random.randint(0,8)]
-
-    theApp.player1_status = theApp.player1_status if count % 100 != 0 else status[random.randint(0,3)]
-    theApp.player2_status = theApp.player2_status if count % 100 != 0 else status[random.randint(0,3)]
-    theApp.player3_status = theApp.player3_status if count % 100 != 0 else status[random.randint(0,3)]
-
-
     draw_status(theApp.player1_status, "1")
     draw_status(theApp.player2_status, "2")
     draw_status(theApp.player3_status, "3")
@@ -207,13 +209,29 @@ while True:
             x[i] = x[i] + offset_x if x[i] + offset_x < width else x[i] + offset_x - width
             y[i] = y[i] + offset_y if y[i] + offset_y < height else y[i] + offset_y - height
         reset = True
-    else:
+    elif not buttonA.value and buttonB.value:
         if player == "1" and reset:
-            client.publish("IDD/Illusinate/player1", str(theApp.player1_score + 1))
+            client.publish("IDD/Illusinate/player1_status", str(2))
         elif player == "2" and reset:
-            client.publish("IDD/Illusinate/player2", str(theApp.player2_score + 1))
+            client.publish("IDD/Illusinate/player2_status", str(2))
+        elif player == "3" and reset:
+            client.publish("IDD/Illusinate/player3_status", str(2))
+        reset = False
+    elif buttonA.value and not buttonB.value:
+        if player == "1" and reset:
+            client.publish("IDD/Illusinate/player1_status", str(0))
         elif player == "2" and reset:
-            client.publish("IDD/Illusinate/player3", str(theApp.player2_score + 1))
+            client.publish("IDD/Illusinate/player2_status", str(0))
+        elif player == "3" and reset:
+            client.publish("IDD/Illusinate/player3_status", str(0))
+        reset = False
+    elif not buttonA.value and not buttonB.value:
+        if player == "1" and reset:
+            client.publish("IDD/Illusinate/player1_status", str(1))
+        elif player == "2" and reset:
+            client.publish("IDD/Illusinate/player2_status", str(1))
+        elif player == "3" and reset:
+            client.publish("IDD/Illusinate/player3_status", str(1))
         reset = False
 
     ### render clock
