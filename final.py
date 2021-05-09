@@ -64,7 +64,7 @@ def on_message(cleint, userdata, msg):
     elif p == "player2_status":
         theApp.player2_status = status[int(msg.payload.decode('UTF-8'))]
     elif p == "player3_emoji":
-        theApp.player3_emoji = emoji[int(msg.payload.decode('UTF-8'))]     
+        theApp.player3_emoji = emojis[int(msg.payload.decode('UTF-8'))]     
     else:
         theApp.player3_status = status[int(msg.payload.decode('UTF-8'))]
     
